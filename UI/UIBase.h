@@ -4,29 +4,33 @@ namespace olc
 	class PixelGameEngine;
 }
 
-class UIBase
+namespace devkit
 {
-public:
-	virtual ~UIBase() = default;
 
-	void Update(olc::PixelGameEngine* pge)
+	class UIBase
 	{
-		if (!mEnabled)
+	public:
+		virtual ~UIBase() = default;
+
+		void Update(olc::PixelGameEngine* pge)
 		{
-			return;
+			if (!mEnabled)
+			{
+				return;
+			}
+
+			UpdateInternal(pge);
+			DrawInternal(pge);
 		}
 
-		UpdateInternal(pge);
-		DrawInternal(pge);
-	}
+		void Enable() { mEnabled = true; }
+		void Disable() { mEnabled = false; }
 
-	void Enable() { mEnabled = true;}
-	void Disable() {mEnabled = false;}
+	protected:
+		virtual void DrawInternal(olc::PixelGameEngine* pge) const = 0;
+		virtual bool UpdateInternal(olc::PixelGameEngine* pge) = 0;
 
-protected:
-	virtual void DrawInternal(olc::PixelGameEngine* pge) const = 0;
-	virtual bool UpdateInternal(olc::PixelGameEngine* pge) = 0;
-
-private:
-	bool mEnabled = true;
-};
+	private:
+		bool mEnabled = true;
+	};
+}

@@ -20,177 +20,180 @@ namespace InputTextInternal
 
 
 }
-
-class UIInputText : public UIText
+namespace devkit
 {
-public:
-	UIInputText(int x, int y, int width, int height, const char* text, olc::Pixel textColor): UIText(x, y, text, textColor)
+
+	class UIInputText : public UIText
 	{
-		mBB.Init(x, y, width, height);
-		SetSelected(false);
-		mPosText = olc::vi2d(x, y + height / 2 - 4);
-	}
-	UIInputText(int x, int y, int width, int height, const char* text, olc::Pixel textColor, std::shared_ptr<olc::Font> font): UIText(x, y, text, textColor, font)
-	{
-		mBB.Init(x, y, width, height);
-		SetSelected(false);
-		mPosText = olc::vi2d(x , y + height / 2 - 4);
-	}
-
-	void SetMaxLength(int numCharacters)
-	{
-		mMaxLengthText = numCharacters;
-	}
-
-private:
-
-	void DrawInternal(olc::PixelGameEngine* pge) const override
-	{
-		pge->FillRect(mBB.GetMin(), mBB.GetSize(), mColorBG);
-		if (mFont)
+	public:
+		UIInputText(int x, int y, int width, int height, const char* text, olc::Pixel textColor) : UIText(x, y, text, textColor)
 		{
-			mFont->DrawStringDecal(mPosText, mText, mColorTxt);
+			mBB.Init(x, y, width, height);
+			SetSelected(false);
+			mPosText = olc::vi2d(x, y + height / 2 - 4);
 		}
-		else
+		UIInputText(int x, int y, int width, int height, const char* text, olc::Pixel textColor, std::shared_ptr<olc::Font> font) : UIText(x, y, text, textColor, font)
 		{
-			pge->DrawString(mPosText, mText, mColorTxt);
+			mBB.Init(x, y, width, height);
+			SetSelected(false);
+			mPosText = olc::vi2d(x, y + height / 2 - 4);
 		}
 
-		if (mSelected)
+		void SetMaxLength(int numCharacters)
 		{
-			const int characterWidth = 8;
-			pge->FillRect(mPosText.x + mCursorPosition * characterWidth, mBB.GetMin().y+3, 2, mBB.GetSize().y-6, olc::BLACK);
-		}
-	}
-
-
-	bool UpdateInternal(olc::PixelGameEngine* pge) override
-	{
-		if (pge->GetMouse(0).bPressed)
-		{	
-			auto pos = pge->GetMousePos();
-			SetSelected(mBB.IsInside(pos));
+			mMaxLengthText = numCharacters;
 		}
 
-		if (mSelected)
-		{
-			UpdateInput(pge);
-		}
-		return false;
-	}
+	private:
 
-private:
-	void UpdateInput(olc::PixelGameEngine* pge)
-	{
-		if (pge->GetKey(olc::LEFT).bPressed)
+		void DrawInternal(olc::PixelGameEngine* pge) const override
 		{
-			mCursorPosition = mCursorPosition <= 0 ? mCursorPosition : mCursorPosition - 1;
-		}
-		else if (pge->GetKey(olc::RIGHT).bPressed)
-		{
-			mCursorPosition = mCursorPosition >= mText.length() ? mCursorPosition : mCursorPosition + 1;
-		}
-		else if (pge->GetKey(olc::BACK).bPressed)
-		{
-			if (mCursorPosition > 0)
+			pge->FillRect(mBB.GetMin(), mBB.GetSize(), mColorBG);
+			if (mFont)
 			{
-				mText.erase(mCursorPosition - 1, 1);
-				mCursorPosition--;
-			}
-		}
-
-		if (mText.length() < mMaxLengthText)
-		{
-			if (pge->GetKey(olc::SPACE).bPressed)
-			{
-				mText.insert(mCursorPosition, 1, ' ');
-				mCursorPosition++;
-			}
-			else if (pge->GetKey(olc::PERIOD).bPressed || pge->GetKey(olc::NP_DECIMAL).bReleased)
-			{
-				mText.insert(mCursorPosition, 1, '.');
-				mCursorPosition++;
-			}
-			else if (pge->GetKey(olc::COMMA).bPressed)
-			{
-				mText.insert(mCursorPosition, 1, ',');
-				mCursorPosition++;
-			}
-			else if (pge->GetKey(olc::MINUS).bPressed)
-			{
-				mText.insert(mCursorPosition, 1, '-');
-				mCursorPosition++;
+				mFont->DrawStringDecal(mPosText, mText, mColorTxt);
 			}
 			else
 			{
-				for (int k = olc::A; k <= olc::Z; ++k)
-				{
-					if (pge->GetKey(static_cast<olc::Key>(k)).bPressed)
-					{
-						int ind = k - olc::A;
-						if (pge->GetKey(olc::SHIFT).bHeld)
-						{
-							mText.insert(mCursorPosition, 1, InputTextInternal::letters_capital[ind]);
-						}
-						else
-						{
-							mText.insert(mCursorPosition, 1, InputTextInternal::letters[ind]);
-						}
-						mCursorPosition++;
-						return;
-					}
-				}
-				for (int k = olc::K0; k <= olc::K9; ++k)
-				{
-					if (pge->GetKey(static_cast<olc::Key>(k)).bPressed)
-					{
-						int ind = k - olc::K0;
-						mText.insert(mCursorPosition, 1, InputTextInternal::numbers[ind]);
-						mCursorPosition++;
-						return;
-					}
-				}
-				for (int k = olc::NP0; k <= olc::NP9; ++k)
-				{
-					if (pge->GetKey(static_cast<olc::Key>(k)).bPressed)
-					{
-						int ind = k - olc::NP0;
-						mText.insert(mCursorPosition, 1, InputTextInternal::numbers[ind]);
-						mCursorPosition++;
-						return;
-					}
-				}
+				pge->DrawString(mPosText, mText, mColorTxt);
+			}
+
+			if (mSelected)
+			{
+				const int characterWidth = 8;
+				pge->FillRect(mPosText.x + mCursorPosition * characterWidth, mBB.GetMin().y + 3, 2, mBB.GetSize().y - 6, olc::BLACK);
 			}
 		}
 
 
-	}
-
-
-	void SetSelected(bool selected)
-	{
-		if (!mSelected)
+		bool UpdateInternal(olc::PixelGameEngine* pge) override
 		{
-			mCursorPosition = mText.length();
+			if (pge->GetMouse(0).bPressed)
+			{
+				auto pos = pge->GetMousePos();
+				SetSelected(mBB.IsInside(pos));
+			}
+
+			if (mSelected)
+			{
+				UpdateInput(pge);
+			}
+			return false;
 		}
 
-		mSelected = selected;
-		if (mSelected)
+	private:
+		void UpdateInput(olc::PixelGameEngine* pge)
 		{
-			mColorBG = mColorBGselected;
-		}
-		else
-		{
-			mColorBG = mColorBGdefault;
-		}
-	}
+			if (pge->GetKey(olc::LEFT).bPressed)
+			{
+				mCursorPosition = mCursorPosition <= 0 ? mCursorPosition : mCursorPosition - 1;
+			}
+			else if (pge->GetKey(olc::RIGHT).bPressed)
+			{
+				mCursorPosition = mCursorPosition >= mText.length() ? mCursorPosition : mCursorPosition + 1;
+			}
+			else if (pge->GetKey(olc::BACK).bPressed)
+			{
+				if (mCursorPosition > 0)
+				{
+					mText.erase(mCursorPosition - 1, 1);
+					mCursorPosition--;
+				}
+			}
 
-private:
-	olc::Pixel mColorBG = olc::BLACK;
-	olc::Pixel mColorBGselected = olc::WHITE;
-	olc::Pixel mColorBGdefault = olc::GREY;
-	bool mSelected = false;
-	BoundingBox mBB;
-	int mCursorPosition = 0;
-	int mMaxLengthText = 120;
-};
+			if (mText.length() < mMaxLengthText)
+			{
+				if (pge->GetKey(olc::SPACE).bPressed)
+				{
+					mText.insert(mCursorPosition, 1, ' ');
+					mCursorPosition++;
+				}
+				else if (pge->GetKey(olc::PERIOD).bPressed || pge->GetKey(olc::NP_DECIMAL).bReleased)
+				{
+					mText.insert(mCursorPosition, 1, '.');
+					mCursorPosition++;
+				}
+				else if (pge->GetKey(olc::COMMA).bPressed)
+				{
+					mText.insert(mCursorPosition, 1, ',');
+					mCursorPosition++;
+				}
+				else if (pge->GetKey(olc::MINUS).bPressed)
+				{
+					mText.insert(mCursorPosition, 1, '-');
+					mCursorPosition++;
+				}
+				else
+				{
+					for (int k = olc::A; k <= olc::Z; ++k)
+					{
+						if (pge->GetKey(static_cast<olc::Key>(k)).bPressed)
+						{
+							int ind = k - olc::A;
+							if (pge->GetKey(olc::SHIFT).bHeld)
+							{
+								mText.insert(mCursorPosition, 1, InputTextInternal::letters_capital[ind]);
+							}
+							else
+							{
+								mText.insert(mCursorPosition, 1, InputTextInternal::letters[ind]);
+							}
+							mCursorPosition++;
+							return;
+						}
+					}
+					for (int k = olc::K0; k <= olc::K9; ++k)
+					{
+						if (pge->GetKey(static_cast<olc::Key>(k)).bPressed)
+						{
+							int ind = k - olc::K0;
+							mText.insert(mCursorPosition, 1, InputTextInternal::numbers[ind]);
+							mCursorPosition++;
+							return;
+						}
+					}
+					for (int k = olc::NP0; k <= olc::NP9; ++k)
+					{
+						if (pge->GetKey(static_cast<olc::Key>(k)).bPressed)
+						{
+							int ind = k - olc::NP0;
+							mText.insert(mCursorPosition, 1, InputTextInternal::numbers[ind]);
+							mCursorPosition++;
+							return;
+						}
+					}
+				}
+			}
+
+
+		}
+
+
+		void SetSelected(bool selected)
+		{
+			if (!mSelected)
+			{
+				mCursorPosition = mText.length();
+			}
+
+			mSelected = selected;
+			if (mSelected)
+			{
+				mColorBG = mColorBGselected;
+			}
+			else
+			{
+				mColorBG = mColorBGdefault;
+			}
+		}
+
+	private:
+		olc::Pixel mColorBG = olc::BLACK;
+		olc::Pixel mColorBGselected = olc::WHITE;
+		olc::Pixel mColorBGdefault = olc::GREY;
+		bool mSelected = false;
+		BoundingBox mBB;
+		int mCursorPosition = 0;
+		int mMaxLengthText = 120;
+	};
+}
